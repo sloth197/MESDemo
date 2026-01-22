@@ -24,7 +24,7 @@ public class EquipSim
         return new EquipSampleDto
         {
             EquipId = _ctx.EquipId,
-            Timestamp = Datatime.Now,
+            Timestamp = Datetime.Now,
             ProdCount = _ctx.TotalProd,
             DefectCount = _ctx.TotalDefect,
             Temperature = _ctx.Temperature,

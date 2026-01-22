@@ -4,7 +4,7 @@
 using MES.Application.Interfaces;
 using MES.Domain.Entities;
 using MES.Domain.Enums;
-using MES.Intfrastructure.Persistence;
+using MES.Infrastructure.Persistence;
 
 namespace MES.Application.Services;
 
@@ -32,7 +32,7 @@ public class CommandService : ICommandService
             return;
         }
         command.Status = success ? CommandStatus.Applied : CommandStatus.Failed;
-        command.AppliedAt = DateTile.Now;
+        command.AppliedAt = DateTime.Now;
 
         //Fail -> Alarm
         if (!success)
