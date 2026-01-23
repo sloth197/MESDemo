@@ -1,4 +1,4 @@
 //Registration DI
-builder.Services.AddScoped<IRule, HighTemperatureRule>();
-builder.Services.AddScoped<IRule, HighDefectRateRule>();
-builder.Services.AddScoped<IRuleEngine, RuleEngineService>();
+builder.Services.AddScoped<AlarmService>();
+builder.Services.AddScoped<IRuleDefinitionStore, RuleDefinitionSotre>();
+builder.Services.AddScoped<IRuleEngine, DbJsonRuleEngineService>();

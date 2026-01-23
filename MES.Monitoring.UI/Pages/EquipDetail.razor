@@ -1,0 +1,81 @@
+@page "/equip/{EquipId:int}"
+@inject MesApiService MesApiService
+
+<h3>Equip Detail</h3>
+
+@if (Alarm == null)
+{
+    <p>*-Loading alrams-*</p>
+}
+else
+{
+    <table class = "table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Message</th>
+                <th>Level</th>
+                <th>Created</th>
+                <th>Ack</th>
+                <th>Clear</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var alarm in Alarms)
+        {
+            <tr>
+                <td>@alarm.Code</td>
+                <td>@alarm.Message</td>
+                <td>@alarm.Level</td>
+                <td>@alarm.CreatedAt</td>
+                <td>@(alarm.AckAt == null ? "-" : alarm.AckAt.ToString())</td>
+                <td>@(alarm.ClearAt == null ? "-" : alarm.ClearAt.ToString())</td>
+                <td>
+                    <button class = "btn btn-sm btn-outline-primary"
+                        disabled = "@(alarm.AckAt != null || alarm.ClearAt != null)"
+                        @onclick = "() => OnAck(alarm.AlarmId)">
+                        ACK
+                    </button>
+                    <button class = "btn btn-sm btn-outline-primary"
+                            disabled = "@(alarm.ClearAt != null)"
+                            @onclick = "() => OnClear(alarm.AlarmId)">
+                            Clear
+                    </button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+@code 
+{
+    [Parameter] public int EquipId { get; set; }
+    public List<AlarmDto>? Alarms {get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        //TODO:
+        //Alarms = await Api.GetAlarmsAsync(EquipId);
+    }
+    private async Task OnAck(int alarmId)
+    {
+        await Api.AckAlarmAsync(alarmId);
+        await ReloadAlarms();
+    }
+    private async Task ReLoadAlarms()
+    {
+        //TODO:
+        //Alarms = await Api.GetAlarmsAsync(EquipId);
+        StateHasChanged();
+    }
+    public class AlarmDto
+    {
+        public int AlarmId { get; set; }
+        public string Code { get; set; } = "";
+        public string Message { get; set; } = "";
+        public string Level { get; set; } = "";
+        public DateTime CreatedAt { get; set; }
+        public DateTime? AckAt { get; set; }
+        public DateTime? ClearAt { get; set; }
+    }
+}
