@@ -10,6 +10,15 @@ public class MesApiService
     {
         _http = http;
     }
+
+    //알람 목록 조회
+    public async Task<List<AlarmDto>> GetAlarmAsync (int equipId, bool activeOnly = false)
+    {
+        var url = $"/api/alarm?equipId={equipId}&activeOnly={activeOnlt}";
+        var result = await _http.GetFromJsonAsync<List<AlarmDto>>(url);
+        return result ?? new List<AlarmDto>();
+    }
+
     //알람 Ack api호출
     public async Task AckAlarmAsync(int alarmId)
     {

@@ -4,7 +4,37 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MES.Application.Services;
 
-public class AlarmService
+//설비 알람 목록 조회(최신순 정렬)
+public partial class AlarmService
+{
+    public async Task<List<AlarmDto>> GetAlarmAsync(int equipId, bool activeOnly)
+    {
+        var query = _db.Alarms.AsQueryable();
+        query = query.Where(a => a.EquipId == equipId);
+        if(activeOnly)
+        {
+            quety =- query.Where(a => a.ClearAt == null);
+        }
+        var alarms = await.query
+                     .OrderBtDescending(a => a.CreatedAt)
+                     .Take(200)
+                     .Select(a => new AlarmDto
+                     {
+                        AlarmId = a.AlarmId,
+                        EquipId = a.EquipId,
+                        Code  = a Code,
+                        Message = a.Message,
+                        Level = a.Level.ToString(),
+                        CreatedAt = a.CreatedAt,
+                        AckAt = a.AckAt,
+                        ClearAt = a.ClearAt
+                     })
+                     .ToListAsync();
+        return alarms;
+    }
+}
+
+public  class AlarmService
 {
     private readonly MesDbContext _db;
     public AlarmService (MesDbContext db)

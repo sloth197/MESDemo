@@ -3,11 +3,26 @@
 
 <h3>Equip Detail</h3>
 
+<div class = "mb-2">
+    <label>
+        <input type="checkbox" @bind="ActiveOnly" />
+        Active Only (not cleared)
+    </label>
+
+    <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="ReloadAlarms">
+        Refresh
+    </button>
+</div>
+
 @if (Alarm == null)
 {
     <p>*-Loading alrams-*</p>
 }
-else
+else if (Alarm.Count == 0)
+{
+    <p>No Alarms</p>
+}
+else 
 {
     <table class = "table">
         <thead>
@@ -29,8 +44,8 @@ else
                 <td>@alarm.Message</td>
                 <td>@alarm.Level</td>
                 <td>@alarm.CreatedAt</td>
-                <td>@(alarm.AckAt == null ? "-" : alarm.AckAt.ToString())</td>
-                <td>@(alarm.ClearAt == null ? "-" : alarm.ClearAt.ToString())</td>
+                <td>@(alarm.AckAt == null ? "-" : alarm.AckAt.ToString("HH:mm:ss"))</td>
+                <td>@(alarm.ClearAt == null ? "-" : alarm.ClearAt.ToString("HH:mm:ss"))</td>
                 <td>
                     <button class = "btn btn-sm btn-outline-primary"
                         disabled = "@(alarm.AckAt != null || alarm.ClearAt != null)"
@@ -52,21 +67,31 @@ else
 {
     [Parameter] public int EquipId { get; set; }
     public List<AlarmDto>? Alarms {get; set; }
+    private bool ActiveOnly { get; set; } = true;
+    private List<MES.Monitoring.UI.Models.AlarmDto>? Alarms;
+    
     protected override async Task OnInitializedAsync()
     {
         //TODO:
-        //Alarms = await Api.GetAlarmsAsync(EquipId);
+        await ReloadAlarms();
     }
     private async Task OnAck(int alarmId)
     {
-        await Api.AckAlarmAsync(alarmId);
-        await ReloadAlarms();
+        await Api.AckAlarmAsync(alarmId); //Ack Api 호출
+        await ReloadAlarms(); //UI 갱신
     }
     private async Task ReLoadAlarms()
     {
         //TODO:
-        //Alarms = await Api.GetAlarmsAsync(EquipId);
+        Alarms = await Api.GetAlarmsAsync(EquipId, ActiveOnly);
         StateHasChanged();
+    }
+    private async Task OnClear(int alarmId)
+    {
+        //Clear Api 호출
+        await Api.ClearAlarmAsync(alarmId);
+        //UI 갱신
+        await ReloadAlarms();
     }
     public class AlarmDto
     {

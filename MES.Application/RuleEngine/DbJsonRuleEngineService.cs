@@ -74,14 +74,51 @@ public class DbJsonRuleEngineService : IRuleEngine
     //JSON조건과 실제 샘플값 비교
     private static bool IsTriggered(RuleConditionModel condition, EquipSample sample)
     {
+        // 샘플에서 비교값 필드에서 바로 선택
+        double fieldValue = condition.Field switch
+        {
+            "Temperature" => sample.Temperature,
+            "Humidity" => sample.Humidity,
+            "Pressure" => sample.Pressure,
+            "Speed" => sample.Speed,
+            "Voltage" => sample.Voltage,
+            "FlowRate" => sample.FlowRate,
+            "DefectCount" => sample.DefectCount,
+            "ProdCount" => sample.ProdCount,
+            _ => double.NaN
+        };
+
+        if (double.IsNaN(fieldValue))
+        {
+            return false;
+        }
+
         return condition.Type switch
         {
-            "TemperatureGreaterThan" => sample.Temperature > contion.Value,
-            "SpeedLessThan" => sample.Speed < condtion.Value,
-            "DefectCountGreaterThan" => sample.DefectCount > condition.Value,
+            //단순 비교
+            "GreaterThan" => condition.Value.HasValue && fieldValue > condition.Value.Value,
+            "LessThan" => condition.Value.HasValue && fieldValue < conditionValue.Value,
+            //범위 비교(온도, 습도, 압력, 속도, 전압, 유량)
+            "Between" => condition.Min.HasValue && condition.Max.HasValue &&
+            fieldValue >= condition.Min.Value && field <= condition.Max.Value,
+            //불량률 기반 룰
+            "DefectRateGreaterThan" => condition.Rate.HasValue && CalculateDefectRate(sample) > condition.Rate.Value, _=> false
+            //"TemperatureGreaterThan" => sample.Temperature > contion.Value,
+            //"SpeedLessThan" => sample.Speed < condtion.Value,
+            //"DefectCountGreaterThan" => sample.DefectCount > condition.Value,
             _ => false
         };
     }
+
+    private static double CalculateDefectRate(EquipSample sample)
+    {
+        if (sanple.Prodcount <= 0) 
+        {
+            return 0;
+        }
+        return (double)sample.DefectCount / sample.ProdCount;
+    }
+
     private static AlarmLevel ParseAlarmLevel(string level)
     {
         return level switch

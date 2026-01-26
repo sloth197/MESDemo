@@ -13,6 +13,18 @@ public class AlarmController : ControllerBase
         _service = service;
     }
 
+    //설비 알람 목록 조회
+    [HttpGet]
+    public async Task<IActionResult> Get([FromQuery] int equipId, [FromQuery] bool activeOnly = false)
+    {
+        if (equipId <= 0)
+        {
+            return BadRequest("equipId is required");
+        }
+        var result = await _alarmService.GetAlarmAsync(equipId,activeOnly);
+        return Ok(result);
+
+    }
     //사용자가 알람을 확인
     //Id -> alarmId
     [HttpPost("alarmId:int}/ack")]
