@@ -1,0 +1,6 @@
+{
+    "ConnectionStrings": {
+        "MesDb":
+        "Server=localhost;Database=MesDemoDb;Trusted_Connection=True;TrustServerCertificate=True;"
+    }
+}

@@ -1,10 +1,17 @@
 //Registration DI
 using MES.Api.Services;
+using MES.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplica tion.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 //Controllers
 builder.Services.AddControllers();
+//EF core
+builder.Services.AddDbContext<MesDbContext>(options => 
+{
+    options.UseSqlServer(builder.Configuratuin.GetConnectionString("MesDb");)
+});
 
 builder.Services.AddSingleton<SampleIngestService>();
 builder.Services.AddSingleton<CommandsService>();

@@ -1,12 +1,57 @@
 using System.Text.Json;
 using MES.Api.Dtos;
+using MES.Domain.Entities;
+using MES.Infrastructure.Persistence;
 
 namespace MES.Api.Services;
 
 //커맨드 관리 서비스
 public class CommandService
 {
-    //메모리 기반 커맨드 저장
+    private readonly MesDbContext _db;
+    public CommandService(MesDbContext db)
+    {
+        _db = db;
+    }
+    public async Task EvaluateAndCreateCommandAsync(EquipSampleDto sample)
+    {
+        bool hasPending = _db.EquipCommands.Any(c => c.EquipId == sample.EquipId &&
+                                                     c.Status == "Pending");
+        if (sample.Temperature >= 90)
+        {
+            var payload = jsomSerializer.Serialize(new { speed = 60 });
+            var cmd = new EquipCommand
+            {
+                EquipId = sample.EquipId,
+                CommandType = "ChangeSpeed",
+                Payload = payload,
+                Status = "Pending",
+                CreatedAt = DateTime.Now
+            };
+            _db.EqipCommands.Add(cmd);
+            await _db.SaveChangesAsync();
+        }
+    }
+    public List<EquipCommand> GetPending(int equipId)
+    {
+        return _db.EquipCommands .Where(c => c.EquipId == equipId &&
+                                        c.Status == "Pending")
+                                        .ToList();
+    }
+    public async Task<bool> AckAsync(int commandId, bool success)
+    {
+        var cmd = await _db.EquipCommands.FindAsync(commandId);
+        if (cmd == null)
+        {
+            return false;
+        }
+        cmd.Status = success ? "Applied" : "Failed";
+        cmd.AppliedAt = DateTime.Now;
+        await _db.SaveChangesAsync();
+        return true;
+    }
+    
+    /* //메모리 기반 커맨드 저장
     private readonly List<CommandDto> _commands = new();
     //커맨드 ID 자동 증가
     private int _commandSeq = 1;
@@ -70,5 +115,5 @@ public void EvalauteAndCreateCommandIfNeeded(EquipSampleFto sample)
             Status = "Pending"
         };
         _commands.Add(cmd);
-    }
+    } */
 }
